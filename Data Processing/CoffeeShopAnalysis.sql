@@ -208,7 +208,7 @@ GROUP BY product_detail
 ORDER BY items_sold DESC
 LIMIT 10;
 
---Summarise the data and create one table 
+--========================================Summarise the data and create one table ==============================================
 SELECT 
 
     -- === PRODUCT INFO ===
