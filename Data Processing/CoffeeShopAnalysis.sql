@@ -1,5 +1,5 @@
 SELECT *
-FROM dbo.coffee
+FROM workspace.dbo.coffee
 LIMIT 3;
 
 --Check datatypes
@@ -7,21 +7,21 @@ DESCRIBE `workspace`.`dbo`.`coffee`;
 
 --Check price range
 SELECT MAX(unit_price)
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 SELECT MIN(unit_price)
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --get the total sales for the whole perios jan-June
 select SUM(unit_price*transaction_qty)
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Check quantity range
 SELECT MAX(transaction_qty)
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 SELECT MIN(transaction_qty)
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Check transaction date range
 SELECT
@@ -33,7 +33,7 @@ FROM `workspace`.`dbo`.`coffee`;
 
 --1. Check total rows
 SELECT COUNT(*) AS total_rows
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 /*
 2.
@@ -54,12 +54,12 @@ SUM(CASE WHEN unit_price IS NULL THEN 1 ELSE 0 END) AS null_unit_price,
 SUM(CASE WHEN product_category IS NULL THEN 1 ELSE 0 END) AS null_protCt,
 SUM(CASE WHEN product_type IS NULL THEN 1 ELSE 0 END) AS null_prodtype, 
 SUM(CASE WHEN product_detail IS NULL THEN 1 else 0 END) AS prod_details
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 --conclusion-there are no null values
 
 -- 3. Check for duplicate transcations
 SELECT transaction_id, count(*) as numofDuplicatse
-FROM dbo.coffee
+FROM workspace.dbo.coffee
 GROUP BY transaction_id
 HAVING count(*)> 0;
 --conclusion-there are no duplicate values
@@ -68,37 +68,37 @@ HAVING count(*)> 0;
 
 --GET the number of stores
 SELECT COUNT (DISTINCT store_location) AS Store_Location
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the different store locations
 SELECT DISTINCT store_location 
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the number of prodcuct category
 SELECT COUNT (DISTINCT product_category) AS product_category
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the different Categories
 SELECT DISTINCT product_category
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the number of prodcuct details
 SELECT COUNT (DISTINCT product_detail) AS product_detail
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the different product details
 SELECT DISTINCT product_detail
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 SELECT COUNT (DISTINCT product_type) AS product_type
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 --Get the different product details
 SELECT DISTINCT product_type
-FROM dbo.coffee;
+FROM workspace.dbo.coffee;
 
 
---Conclusion- All categorical colummns are standardised. 
+--============================================================Conclusion- All categorical colummns are standardised.===============================================================================
 
 --Next Step: Transform/summarise the data
 
