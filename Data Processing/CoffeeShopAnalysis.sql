@@ -100,53 +100,169 @@ FROM dbo.coffee;
 
 --Conclusion- All categorical colummns are standardised. 
 
---Next Step: Convert the date and group the time 
+--Next Step: Transform/summarise the data
 
--- Convert transaction_date from raw text to a readable date format dd MMMM yyyy
-SELECT
-    transaction_date,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'dd MMMM yyyy') AS transaction_date_formatted
-FROM `workspace`.`dbo`.`coffee`
-LIMIT 10;
+SELECT *
+FROM workspace.dbo.coffee
+LIMIT 3;
 
---Convert transaction_time to 12-hour format with AM/PM.
-SELECT
-    transaction_time,
-DATE_FORMAT(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'), 'hh:mm:ss a')   AS transaction_time
-FROM `workspace`.`dbo`.`coffee`
-LIMIT 10;
-
---Create time_of_day buckets
-SELECT
-CASE
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 6  AND 11 THEN 'Morning'
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 12 AND 16 THEN 'Afternoon'
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 17 AND 20 THEN 'Evening'
-        ELSE 'Night'
-    END   AS time_of_day
-FROM `workspace`.`dbo`.`coffee`;
-
---Transformation: Create new columns that will assist us in our analysis, the store opens at 6am and closes at 9pm
-SELECT
-    transaction_id,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'dd MMMM yyyy')    AS transaction_date,
-    DATE_FORMAT(TO_TIMESTAMP(transaction_time, 'HH:mm:ss'), 'hh:mm:ss a')   AS transaction_time,
-    transaction_qty,
-    store_id,
-    store_location,
-    product_id,
-    unit_price,
-    product_category,
-    product_type,
+--Which product makes the most revenue
+SELECT 
     product_detail,
-    ROUND(unit_price * transaction_qty, 2)                                   AS total_sales,
-    MONTH(TO_DATE(transaction_date, 'yyyy/MM/dd'))                           AS month,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'MMM')              AS month_name,
-    DATE_FORMAT(TO_DATE(transaction_date, 'yyyy/MM/dd'), 'EEEE')             AS day_of_week,
+    ROUND(SUM(transaction_qty * unit_price), 2) AS product_Revenue
+FROM workspace.dbo.coffee
+GROUP BY product_detail
+ORDER BY product_Revenue DESC;
+
+/*
+What time of day is busiest?Peak hours analysis Column to use: transaction_time + transaction_qty
+For this one we need to extract the hour from transaction_time and then label it as:
+ Morning / Afternoon / Evening using CASE
+
+*/
+
+SELECT 
+    --dayname(transaction_date) AS day_of_The_Week,
+    HOUR(transaction_time) AS hour_of_day,
+CASE 
+    WHEN  hour_of_day  BETWEEN 6 AND 11 THEN 'MORNING'
+    WHEN  hour_of_day BETWEEN 12 AND 16 THEN 'AFTERNOON'
+    WHEN  hour_of_day BETWEEN 17 AND 20 THEN 'EVENING'
+    ELSE 'off_peak'
+    END AS time_of_day,
+SUM(transaction_qty) as total_items_sold
+FROM workspace.dbo.coffee
+GROUP BY 
+  hour_of_day,
+ --dayname(transaction_date),
     CASE
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 6  AND 11 THEN 'Morning'
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 12 AND 16 THEN 'Afternoon'
-        WHEN HOUR(TO_TIMESTAMP(transaction_time, 'HH:mm:ss')) BETWEEN 17 AND 20 THEN 'Evening'
-        ELSE 'Night'
-    END   AS time_of_day
-FROM `workspace`.`dbo`.`coffee`;
+        WHEN HOUR(transaction_time) BETWEEN 6  AND 11 THEN 'Morning'
+        WHEN HOUR(transaction_time) BETWEEN 12 AND 16 THEN 'Afternoon'
+        WHEN HOUR(transaction_time) BETWEEN 17 AND 20 THEN 'Evening'
+        ELSE 'Off Peak'
+    END
+    ORDER BY total_items_sold DESC;
+
+    --Which store performs best?
+  SELECT 
+  store_location, 
+    ROUND(SUM(transaction_qty* unit_price), 2) as total_revenue_by_store,
+    SUM(transaction_qty) as total_items_sold,
+    COUNT(DISTINCT transaction_id) AS total_transaction_per_store
+  FROM workspace.dbo.coffee
+  GROUP BY store_location
+  ORDER BY total_revenue_by_store DESC;
+
+
+/*
+How are sales trending over time? Monthly/weekly trends(which month perfroms best)
+*/
+
+SELECT 
+    MONTHNAME(transaction_date) AS Month_name, 
+    MONTH(transaction_date) AS month_number,
+    ROUND(SUM(transaction_qty* unit_price), 2) AS total_revenue_per_Month
+FROM workspace.dbo.coffee
+GROUP BY Month_name, month_number
+ORDER BY total_revenue_per_Month DESC;
+
+
+--Which category earns the most? (Revenue by category)
+
+SELECT 
+    product_category, 
+    ROUND(SUM(transaction_qty * unit_price), 2) total_revenue_By_Cat, 
+    SUM(transaction_qty) AS Items_sold_in_Cat,
+    COUNT(DISTINCT transaction_id) AS num_of_transaction_forThisCat
+FROM workspace.dbo.coffee
+GROUP BY product_category
+ORDER BY total_revenue_By_Cat DESC;
+
+-- What days sell the most? (Day of week patterns)
+SELECT 
+    dayname(transaction_date) AS day_name,
+    dayofweek(transaction_date) AS day_number,
+    ROUND(SUM(transaction_qty * unit_price), 2) AS revenue_per_Day,
+    COUNT(transaction_id) AS total_transactions,
+    SUM(transaction_qty)  AS total_units_sold
+FROM workspace.dbo.coffee
+GROUP BY day_name, day_number
+ORDER BY revenue_per_Day DESC;
+
+
+--What is the average order value? (Spend per transaction)
+SELECT 
+COUNT(transaction_id) as total_transactions,
+ROUND(SUM(transaction_qty * unit_price),2) AS total_revenue,
+ROUND(SUM(transaction_qty * unit_price) / COUNT(transaction_id), 2) AS Average_spend
+FROM workspace.dbo.coffee;
+
+--  Which products sell most by volume? (Units sold ranking)
+SELECT 
+    product_detail,
+    SUM(transaction_qty) as items_sold,
+    ROUND(SUM(transaction_qty * unit_price), 2) AS product_Revenue,  
+    COUNT( DISTINCT transaction_ID) transaction_per_product_detail
+FROM workspace.dbo.coffee
+GROUP BY product_detail
+ORDER BY items_sold DESC
+LIMIT 10;
+
+--Summarise the data and create one table 
+SELECT 
+
+    -- === PRODUCT INFO ===
+    product_detail,
+    product_category,
+
+    -- === DATE INFO ===
+    transaction_date,
+    MONTHNAME(transaction_date)             AS month_name,
+    MONTH(transaction_date)                 AS month_number,
+    DAYNAME(transaction_date)               AS day_name,
+    DAYOFWEEK(transaction_date)             AS day_number,
+
+    -- === TIME INFO ===
+    HOUR(transaction_time)                  AS hour_of_day,
+    CASE 
+    WHEN  hour_of_day BETWEEN 6 AND 11 THEN 'MORNING'
+    WHEN  hour_of_day BETWEEN 12 AND 16 THEN 'AFTERNOON'
+    WHEN  hour_of_day BETWEEN 17 AND 20 THEN 'EVENING'
+    ELSE 'off_peak'
+    END AS time_of_day,
+
+    -- === STORE INFO ===
+    store_location,
+
+    -- === NUMBERS ===
+    COUNT(transaction_id)                   AS total_transactions,
+    SUM(transaction_qty)                    AS total_units_sold,
+    ROUND(SUM(transaction_qty * unit_price), 2) AS total_revenue,
+    ROUND(SUM(transaction_qty * unit_price) / 
+          COUNT(transaction_id), 2)         AS avg_order_value,
+
+    -- === PERFORMANCE LABELS ===
+    CASE
+        WHEN SUM(transaction_qty * unit_price) >= 50000 THEN 'Top Seller'
+        WHEN SUM(transaction_qty * unit_price) >= 20000 THEN 'Mid Seller'
+        ELSE 'Low Seller'
+    END  AS performance_category
+
+FROM workspace.dbo.coffee
+GROUP BY
+    product_detail,
+    product_category,
+    transaction_date,
+    MONTHNAME(transaction_date),
+    MONTH(transaction_date),
+    DAYNAME(transaction_date),
+    DAYOFWEEK(transaction_date),
+    HOUR(transaction_time),
+    CASE
+        WHEN HOUR(transaction_time) BETWEEN 6  AND 11 THEN 'Morning'
+        WHEN HOUR(transaction_time) BETWEEN 12 AND 16 THEN 'Afternoon'
+        WHEN HOUR(transaction_time) BETWEEN 17 AND 20 THEN 'Evening'
+        ELSE 'Off Peak'
+    END,
+    store_location
+ORDER BY total_revenue DESC;
