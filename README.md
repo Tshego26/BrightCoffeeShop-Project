@@ -152,10 +152,24 @@ END AS spend_category
 
 > Revenue grew consistently every month, nearly doubling from February to June. April–June is the peak season.
 
+---
 
-## Dashboard and Pivot Tables (Analysis)
-* Microsoft Excel dashboard*
-<img width="3362" height="1503" alt="image" src="https://github.com/user-attachments/assets/4bcd631c-b7da-42b5-a4a8-7c63236be710" />
+## Overall Findings
+
+Bright Coffee Shop generated R698,812 in total revenue across 149,116 transactions between January and June 2023, with an average order value of R4.69. Revenue grew consistently every month, nearly doubling from R76,145 in February to R166,485 in June, suggesting strong seasonal demand heading into summer.
+
+Hell's Kitchen was the top performing store at R236,511 in revenue, leading consistently across all 6 months. Lower Manhattan presented the most interesting pattern, fewest customers walking in but the highest units sold per visit, indicating a loyal, high-frequency buying customer base.
+
+Coffee dominated as the top revenue category at R269,952, accounting for 39% of total revenue, with Tea a distant second at R196,405. Coffee Beans emerged as a premium segment with the highest average order value at R22.63 per order, while Flavours raised a pricing concern, generating only R1.24 per item despite high sales volume.
+
+Morning was the peak trading period across all stores, generating R388,288 more than the afternoon and evening combined. Monday and Friday were the strongest days while Saturday consistently underperformed, pointing to a predominantly weekday commuter customer base.
+
+From a spend behaviour perspective, Mid Spenders drove the most revenue at R388,094 despite being outnumbered by Low Spenders who made up 60.8% of all transactions. High Spenders represented only 0.7% of customers but contributed R31,170, making them the most valuable segment per visit.
+
+---
+
+## Dashboard
+Microsoft Excel dashboard completed with 5 analytical sheets and one summary dashboard covering store performance, category insights, time and day analysis, and spend category behaviour.
 
 ---
 
