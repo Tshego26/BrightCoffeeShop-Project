@@ -41,12 +41,17 @@ This analysis answers the following business questions:
 | product_detail | string | Full product name and size |
 
 ## Tools Used
+
+| Tool | Purpose |
+|---|---|
 | Microsoft Excel | Quick data validation checks |
-| Miro | project planning and brainstorming |
+| Miro | Project planning and brainstorming |
 | Databricks (SQL) | Data cleaning and transformation |
-| Canva | Project phase Update  |
+| Canva | Project phase updates |
 | Microsoft Excel | Data visualisation and dashboard |
-| Microsoft PowerPoint | Project Presentation |
+| Canva| Project Presentation |
+
+---
 
 
 ## Data Inspection Summary
@@ -91,7 +96,22 @@ DAYNAME(transaction_date)   AS day_name,
     ELSE 'off_peak'
     END AS time_of_day,
 ```
+**5. Extracted `day type`**
+```sql
+CASE
+    WHEN day_name IN('Sun', 'Sat') THEN 'Weekend'
+    ELSE   'Weekday'
+    END AS day_type,
+```
 
+**5. Extracted `Spening categories`**
+```sql
+CASE
+    WHEN (transaction_qty * unit_price) >= 20   THEN 'High Spender'
+    WHEN (transaction_qty * unit_price) >= 4.69 THEN 'Mid Spender'
+    ELSE                                             'Low Spender'
+END AS spend_category
+```
 ---
 
 ## Key Findings
@@ -133,8 +153,9 @@ DAYNAME(transaction_date)   AS day_name,
 > Revenue grew consistently every month, nearly doubling from February to June. April–June is the peak season.
 
 
-## Dashboard
-* Microsoft Excel dashboard to be added after visualisation step is complete.*
+## Dashboard and Pivot Tables
+* Microsoft Excel dashboard*
+<img width="3362" height="1503" alt="image" src="https://github.com/user-attachments/assets/4bcd631c-b7da-42b5-a4a8-7c63236be710" />
 
 ---
 
@@ -145,5 +166,5 @@ Data Analyst | South Africa
 ---
 
 ## Status
-🟡 In Progress — Currently at Step 4: Analysis
+🟡 Completed
 
