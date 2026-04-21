@@ -61,7 +61,7 @@ FROM workspace.dbo.coffee;
 SELECT transaction_id, count(*) as numofDuplicatse
 FROM workspace.dbo.coffee
 GROUP BY transaction_id
-HAVING count(*)> 0;
+HAVING count(*)> 1;
 --conclusion-there are no duplicate values
 
 --4. Standardise Categorical columns
